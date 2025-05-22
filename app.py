@@ -1,7 +1,7 @@
 import os
 import telebot
-import openai
 from flask import Flask, request
+from openai import OpenAI
 
 # Получение ключей из переменных окружения
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
@@ -11,9 +11,9 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 if not TELEGRAM_BOT_TOKEN or not OPENAI_API_KEY:
     raise ValueError("❌ Отсутствует TELEGRAM_BOT_TOKEN или OPENAI_API_KEY в переменных окружения")
 
-# Инициализация ботов
+# Инициализация бота Telegram и клиента OpenAI
 bot = telebot.TeleBot(TELEGRAM_BOT_TOKEN)
-openai.api_key = OPENAI_API_KEY
+client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Flask-приложение
 app = Flask(__name__)
@@ -34,7 +34,7 @@ def handle_message(message):
         user_input = message.text
         print(f"📩 Сообщение: {user_input}")
 
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[{"role": "user", "content": user_input}]
         )
@@ -47,3 +47,4 @@ def handle_message(message):
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
+
